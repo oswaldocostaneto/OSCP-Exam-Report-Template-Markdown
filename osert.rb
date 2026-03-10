@@ -201,6 +201,33 @@ def sed(file, text_i, text_o)
   end
 end
 
+def build_resource_path(input, extra_path)
+  # Include markdown directory so relative image paths are resolved from the .md location.
+  input_dir = File.dirname(File.expand_path(input))
+  paths = ['.', '/usr/share/osert/src', 'src']
+  paths.concat(extra_path.to_s.split(':'))
+  paths << input_dir
+
+  paths.map! { |path| path.strip }
+  paths.reject!(&:empty?)
+  paths.uniq.join(':')
+end
+
+def executable_in_path?(cmd)
+  ENV.fetch('PATH', '').split(File::PATH_SEPARATOR).any? do |dir|
+    path = File.join(dir, cmd)
+    File.file?(path) && File.executable?(path)
+  end
+end
+
+def preview_command
+  host_os = RUBY_PLATFORM.downcase
+  return ['open', '-a', 'Preview'] if host_os.include?('darwin') && executable_in_path?('open')
+  return ['xdg-open'] if executable_in_path?('xdg-open')
+
+  nil
+end
+
 begin
   case command
   when 'init'
@@ -255,16 +282,8 @@ begin
     puts ' for getting your report.'
   when 'generate'
     puts '[+] Preparing your final report...'
-    # Choose syntax highlight style
-    style = 'breezedark'
-    puts "[+] Choose syntax highlight style [#{style}]:"
-    styles = `pandoc --list-highlight-styles`.split("\n")
-    styles.each_with_index do |s, i|
-      puts "#{colors[:red]}#{i}. #{s}#{colors[:nocolor]}"
-    end
-    puts_prompt
-    choice = gets.chomp
-    style = styles[choice.to_i] unless choice.empty?
+    # Use Pandoc idiomatic syntax highlighting (listings-like output for LaTeX/PDF).
+    style = 'idiomatic'
 
     if options[:input]
       input = options[:input]
@@ -303,16 +322,30 @@ begin
     # Generating report
     puts '[+] Generating report...'
     pdf = "#{output}/#{exam}-#{osid}-Exam-Report.pdf"
+    resource_path = build_resource_path(input, options[:'resource-path'])
+    inline_code_filter = File.expand_path('filters/inline_code_box.lua', __dir__)
+    local_template = File.expand_path('src/templates/eisvogel.latex', __dir__)
+    logo_path = File.expand_path('src/img/offsec-learning-partner.png', __dir__)
+    template = File.exist?(local_template) ? local_template : 'eisvogel'
+    template_arg = File.exist?(local_template) ? "--template #{template.shellescape} \\" : '--template eisvogel \\'
+    logo_arg = File.exist?(logo_path) ? "-V titlepage-logo=#{logo_path.shellescape} \\" : ''
+    footer_right = '\\thepage\\ /\\ \\pageref*{LastPage}'
+    header_includes = '\\usepackage{lastpage}'
     `pandoc #{input.shellescape} -o #{pdf.shellescape} \
       --from markdown+yaml_metadata_block+raw_html \
-      --template eisvogel \
+      #{template_arg}
+      -V book=true \
+      #{logo_arg}
+      -V header-includes=#{header_includes.shellescape} \
+      -V footer-right=#{footer_right.shellescape} \
+      --pdf-engine=xelatex \
+      --lua-filter=#{inline_code_filter.shellescape} \
       --table-of-contents \
       --toc-depth 6 \
       --number-sections \
       --top-level-division=chapter \
-      --highlight-style #{style} \
-      --resource-path=.:/usr/share/osert/src:src \
-      --resource-path=#{options[:'resource-path'].shellescape}
+      --syntax-highlighting=#{style} \
+      --resource-path=#{resource_path.shellescape}
     `
     puts "[+] PDF generated at #{colors[:red]}#{pdf}#{colors[:nocolor]}"
 
@@ -320,10 +353,18 @@ begin
     puts_prompt '[+] Do you want to preview the report? [Y/n]'
     choice = gets.chomp
     if choice.downcase == 'y' || choice.empty?
-      viewer = fork do
-        exec "xdg-open #{pdf.shellescape}"
+      opener = preview_command
+      if opener
+        viewer = fork do
+          exec(*opener, pdf)
+        rescue Errno::ENOENT
+          warn "[!] Preview command not found: #{opener.join(' ')}"
+          exit! 1
+        end
+        Process.detach(viewer)
+      else
+        warn '[!] No preview command available (expected: open or xdg-open).'
       end
-      Process.detach(viewer)
     end
 
     # Generating archive
