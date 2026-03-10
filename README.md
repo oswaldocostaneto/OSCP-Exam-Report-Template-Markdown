@@ -2,10 +2,18 @@
 
 This private fork is based on [noraj/OSCP-Exam-Report-Template-Markdown](https://github.com/noraj/OSCP-Exam-Report-Template-Markdown), with practical improvements for a real `ruby osert.rb generate` workflow.
 
+The customization scope is focused on the **official OffSec OSCP report template v2.0** (`src/OSCP-exam-report-template_OS_v2.md`) and its PDF generation flow.
+
 ## Upstream Reference
 
 - Upstream project: [noraj/OSCP-Exam-Report-Template-Markdown](https://github.com/noraj/OSCP-Exam-Report-Template-Markdown)
 - Base PDF template: [Wandmalfarbe/eisvogel](https://github.com/Wandmalfarbe/pandoc-latex-template)
+- Official OSCP v2.0 markdown base used by this fork: `src/OSCP-exam-report-template_OS_v2.md`
+
+## Scope and Non-Goals
+
+- This fork intentionally targets the official OSCP v2.0 template experience.
+- Other exam templates provided by the upstream repository were not reworked in this fork.
 
 ## What This Fork Adds
 
