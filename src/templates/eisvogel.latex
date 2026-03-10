@@ -372,6 +372,7 @@ $if(graphics)$
 \usepackage{fancybox}
 \usepackage{etoolbox}
 \makeatletter
+\setkeys{Gin}{width=\linewidth,height=0.82\textheight,keepaspectratio}
 \newsavebox\pandoc@box
 \newsavebox\pandoc@scaledbox
 \newlength{\pandoc@imgmaxw}
