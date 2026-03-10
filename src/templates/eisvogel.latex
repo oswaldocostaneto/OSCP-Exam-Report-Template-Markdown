@@ -369,7 +369,6 @@ $-- graphics
 $--
 $if(graphics)$
 \usepackage{graphicx}
-\usepackage{fancybox}
 \usepackage{etoolbox}
 \makeatletter
 \setkeys{Gin}{width=\linewidth,height=0.82\textheight,keepaspectratio}
@@ -378,20 +377,19 @@ $if(graphics)$
 \newlength{\pandoc@imgmaxw}
 \newlength{\pandoc@imgmaxh}
 \newcommand{\pandoc@setimgmax}{%
-  % Reserve room for border/shadow so the final framed image still fits.
-  \setlength{\pandoc@imgmaxw}{\dimexpr\linewidth-2\fboxrule-\shadowsize\relax}%
-  \setlength{\pandoc@imgmaxh}{\dimexpr0.82\textheight-2\fboxrule-\shadowsize\relax}%
+  % Reserve room for border so the final framed image still fits.
+  \setlength{\pandoc@imgmaxw}{\dimexpr\linewidth-2\fboxrule\relax}%
+  \setlength{\pandoc@imgmaxh}{\dimexpr0.82\textheight-2\fboxrule\relax}%
 }
 \newcommand*\pandocbounded[1]{% scales image to fit in text height/width
   \begingroup
-    % Avoid nested shadow: render the raw image first, then wrap once.
+    % Avoid nested border: render the raw image first, then wrap once.
     \let\includegraphics\pandocorigincludegraphics
     \setlength{\fboxsep}{0pt}%
     \setlength{\fboxrule}{0.75pt}% ~1px border
-    \setlength{\shadowsize}{1.6pt}% subtle but visible shadow
     \pandoc@setimgmax%
     \sbox\pandoc@scaledbox{\adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{#1}}%
-    {\color{black!35}\shadowbox{\usebox{\pandoc@scaledbox}}}%
+    {\color{black!35}\fbox{\usebox{\pandoc@scaledbox}}}%
   \endgroup
 }
 \let\pandocorigincludegraphics\includegraphics
@@ -399,13 +397,12 @@ $if(graphics)$
   \begingroup
     \setlength{\fboxsep}{0pt}%
     \setlength{\fboxrule}{0.75pt}% ~1px border
-    \setlength{\shadowsize}{1.6pt}% subtle but visible shadow
     \pandoc@setimgmax%
     \sbox\pandoc@scaledbox{\adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{\pandocorigincludegraphics[#1]{#2}}}%
-    {\color{black!35}\shadowbox{\usebox{\pandoc@scaledbox}}}%
+    {\color{black!35}\fbox{\usebox{\pandoc@scaledbox}}}%
   \endgroup
 }
-% Apply border/shadow to all body images (including those emitted outside figure env).
+% Apply border to all body images (including those emitted outside figure env).
 \AtBeginDocument{\let\includegraphics\pandocshadowincludegraphics}
 % Set default figure placement to htbp
 % Make use of float-package and set default placement for figures to H.

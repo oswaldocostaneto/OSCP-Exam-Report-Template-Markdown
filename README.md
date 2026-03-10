@@ -1,64 +1,50 @@
 # OSCP Exam Report Template - o5Cn
 
-This private fork is based on [noraj/OSCP-Exam-Report-Template-Markdown](https://github.com/noraj/OSCP-Exam-Report-Template-Markdown), with practical improvements for a real `ruby osert.rb generate` workflow.
+This fork is based on [noraj/OSCP-Exam-Report-Template-Markdown](https://github.com/noraj/OSCP-Exam-Report-Template-Markdown), focused on a practical workflow for the official OffSec OSCP v2.0 report style.
 
-The customization scope is focused on the **official OffSec OSCP report template v2.0** (`src/OSCP-exam-report-template_OS_v2.md`) and its PDF generation flow.
-
-## Upstream Reference
+## 🔎 Upstream Reference
 
 - Upstream project: [noraj/OSCP-Exam-Report-Template-Markdown](https://github.com/noraj/OSCP-Exam-Report-Template-Markdown)
 - Base PDF template: [Wandmalfarbe/eisvogel](https://github.com/Wandmalfarbe/pandoc-latex-template)
-- Official OSCP v2.0 markdown base used by this fork: `src/OSCP-exam-report-template_OS_v2.md`
 
-## Scope and Non-Goals
+## ✨ What This Fork Adds
 
-- This fork intentionally targets the official OSCP v2.0 template experience.
-- Other exam templates provided by the upstream repository were not reworked in this fork.
-- This fork supports two execution modes: native dependencies and Docker container.
+- Local Eisvogel template versioned in `src/templates/eisvogel.latex`
+- Local OffSec cover logo in `src/img/offsec-learning-partner.png`
+- Better relative image path support (relative to input `.md`)
+- OffSec-like cover page and footer style
+- Page numbering starts on main content (not cover/TOC)
+- Code blocks with border, light background, line numbers, wrapping
+- Inline code styling
+- Images with fixed border (1px-like), no shadow
+- Long URL wrapping inside margins
+- Docker workflow for isolated generation
 
-## What This Fork Adds
+## 🖼️ Preview Gallery (2x3)
 
-- 📄 A versioned local Eisvogel template in `src/templates/eisvogel.latex`.
-- 🖼️ A versioned local cover logo in `src/img/offsec-learning-partner.png`.
-- 🧠 `osert.rb` now prioritizes local template/logo files (no global `~/.local/...` dependency).
-- 📁 Better relative image path support (relative to the source `.md` directory).
-- 🎯 OffSec-style custom cover page.
-- 🔢 Page numbering starts at the main content (not on cover/TOC pages).
-- 🧾 Custom footer with `OSID` on the left and `PAGE / TOTAL` on the right.
-- 💻 Code blocks with border, light background, line numbers, and long-line wrapping.
-- ✍️ Styled inline code.
-- 🖼️ Image border + subtle shadow (including images with `{ width=... }`).
-- 🔗 Improved long URL wrapping inside margins.
-- 👀 Preview command support for macOS (`open`) and Linux (`xdg-open`).
+<table>
+  <tr>
+    <td><img src="docs/screenshots/cover-page-generic.png" width="320" alt="Cover" /></td>
+    <td><img src="docs/screenshots/contents-page-generic.png" width="320" alt="Contents" /></td>
+    <td><img src="docs/screenshots/page-intro-generic.png" width="320" alt="Intro Page" /></td>
+  </tr>
+  <tr>
+    <td><img src="docs/screenshots/page-methodology-generic.png" width="320" alt="Methodology Page" /></td>
+    <td><img src="docs/screenshots/evidence-page-generic.png" width="320" alt="Evidence Page" /></td>
+    <td><img src="docs/screenshots/code-inline-block-generic.png" width="320" alt="Code Styling" /></td>
+  </tr>
+</table>
 
-## Generic Preview (No Real Report Data)
+## 📁 Included OffSec Markdown Example
 
-The screenshots below were generated only from the example template `src/OSCP-exam-report-template_OS_v2.md` and synthetic sample content.
+This repository includes a DOCX->Markdown converted example, already organized with everything in one folder:
 
-### Cover Page
+- `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md`
+- `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX_images/`
+- `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-OS-12345678-Exam-Report.pdf`
+- `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-OS-12345678-Exam-Report.7z`
 
-![Generic cover page](docs/screenshots/cover-page-generic.png)
-
-### Contents Page
-
-![Generic contents page](docs/screenshots/contents-page-generic.png)
-
-### Example Page with Figure
-
-![Generic page with figure](docs/screenshots/evidence-page-generic.png)
-
-### Inline Code + Code Block Styling
-
-![Generic inline code and code block styling](docs/screenshots/code-inline-block-generic.png)
-
-## Included OSCP Exam Report Template v2.0 in  Markdown format
-
-This fork also includes an OffSec OSCP v2.0 sample report converted from DOCX to Markdown, with a relative image directory ready to use and test:
-
-- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md`
-- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX_images/`
-
-## Usage Mode 1: Native Dependencies (Host Install)
+## 🧰 Usage Mode 1: Native Dependencies
 
 ```bash
 ruby osert.rb init
@@ -75,104 +61,136 @@ ruby osert.rb generate \
   -s OS-12345678
 ```
 
-## Usage Mode 2: Docker (Recommended)
+## 🐳 Usage Mode 2: Docker (Recommended)
 
-This mode avoids installing Pandoc/LaTeX/p7zip directly on your host system.
-The bind mount `-v "$PWD":/workspace` is what makes generated files visible on the host.
-Generated files will be written to your local `./output` directory.
+Use the prebuilt Docker Hub image (recommended):
+
+```bash
+docker pull oswaldocostaneto/oscp-report-template:latest
+```
+
+Run with a Markdown file inside your current repository:
+
+```bash
+printf 'n\nn\n' | docker run --rm -i \
+  -v "$PWD":/workspace \
+  oswaldocostaneto/oscp-report-template:latest generate \
+  -i "path/to/your/markdown-file.md" \
+  -o output \
+  -e OSCP \
+  -s OS-12345678
+```
+
+Generate the included OSCP v2.0 example quickly:
+
+```bash
+printf 'n\nn\n' | docker run --rm -i \
+  -v "$PWD":/workspace \
+  oswaldocostaneto/oscp-report-template:latest generate \
+  -i src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
+  -o output \
+  -e OSCP \
+  -s OS-12345678
+```
+
+Parameters explained:
+
+- `-v "$PWD":/workspace`: mounts your current folder into container
+- `-i`: input Markdown path (relative to your repo root, or absolute container path)
+- `-o`: output directory (relative to your repo root, or absolute container path)
+- `-e`: certification (`OSCP`, `OSWE`, etc.)
+- `-s`: OSID used in output file naming
 
 Important:
 
-- The `-i` input path must exist **inside the container**.
-- If you only mount `-v "$PWD":/workspace`, then `-i` must point to `/workspace/...`.
-- Host paths like `/home/user/...` or `/mnt/hgfs/...` will fail unless you mount them with an extra `-v`.
+- The script asks OSID again in CLI mode only if `-s` is not provided.
+- `-s` controls output filename naming.
+- Report content (email/OSID displayed inside PDF) comes from Markdown metadata/front matter.
+- The two `n` answers skip PDF preview and external lab report prompt.
 
-Build image:
+Use a report outside current repo:
+
+```bash
+printf 'n\nn\n' | docker run --rm -i \
+  -v "$PWD":/workspace \
+  -v "/home/user/reports":/reports \
+  oswaldocostaneto/oscp-report-template:latest generate \
+  -i /reports/Report.md \
+  -o output \
+  -e OSCP \
+  -s OS-12345678
+```
+
+### Secondary Option: Build Image Locally
 
 ```bash
 docker build -t oscp-report-template:local .
 ```
 
-After updating the repository (`git pull`), rebuild the image to pick up dependency changes:
-
-```bash
-docker build --no-cache -t oscp-report-template:local .
-```
-
-Interactive generation:
-
-```bash
-docker run --rm -it -v "$PWD":/workspace oscp-report-template:local generate
-```
-
-Non-interactive generation (recommended for containers):
-
-```bash
-printf 'n\nn\n' | docker run --rm -i -v "$PWD":/workspace oscp-report-template:local generate \
-  -i /workspace/src/OSCP-exam-report-template_OS_v2.md \
-  -o /workspace/output \
-  -e OSCP \
-  -s OS-12345678
-```
-
-Generate the included OffSec DOCX->Markdown example (with relative image folder):
-
-```bash
-printf 'n\nn\n' | docker run --rm -i -v "$PWD":/workspace oscp-report-template:local generate \
-  -i /workspace/output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
-  -o /workspace/output \
-  -e OSCP \
-  -s OS-12345678
-```
-
-The two `n` answers skip:
-
-- PDF preview (`xdg-open`)
-- optional external lab report prompt
-
-Using a report file outside the repository (extra volume mount):
-
 ```bash
 printf 'n\nn\n' | docker run --rm -i \
   -v "$PWD":/workspace \
-  -v "/home/oscn/Desktop/New Folder":/reports \
   oscp-report-template:local generate \
-  -i "/reports/Report.md" \
-  -o /workspace/output \
+  -i src/OSCP-exam-report-template_OS_v2.md \
+  -o output \
   -e OSCP \
   -s OS-12345678
 ```
 
-Direct mode:
+## 🚀 Docker Hub Multi-Platform Publish
 
-```bash
-docker run --rm -it -v "$PWD":/workspace oscp-report-template:local generate \
-  -i /workspace/src/OSCP-exam-report-template_OS_v2.md \
-  -o /workspace/output \
-  -e OSCP \
-  -s OS-12345678
+Automated publishing is configured in:
+
+- `.github/workflows/docker-publish.yml`
+
+Workflow publishes these platforms:
+
+- `linux/amd64`
+- `linux/arm64`
+- `linux/arm/v7`
+
+Platform notes:
+
+- macOS Intel and Apple Silicon: supported
+- Linux x64 and ARM: supported
+- Windows x64 and ARM: supported via Docker Desktop/WSL2 with Linux containers
+- Native Windows container images (`windows/amd64`, `windows/arm64`): not supported by this Ubuntu-based image
+
+Required GitHub secrets:
+
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+
+Publish triggers:
+
+- push to `master` (when Docker-related files change)
+- push tags like `v1.0.0`
+- manual run in Actions (`workflow_dispatch`)
+
+## 📝 Markdown Metadata Quick Guide
+
+The report content shown inside the PDF (title, email, OSID, etc.) comes from YAML front matter in the Markdown file.
+
+Example:
+
+```yaml
+---
+title: "Offensive Security Certified Professional Exam Report"
+author:
+  - "student@youremailaddress.com"
+  - "OSID: XXXXX"
+date: "2026-03-10"
+subject: "OSCP"
+lang: "en"
+titlepage: true
+book: true
+---
 ```
 
-With Docker Compose:
+Quick mapping:
 
-```bash
-docker compose run --rm osert generate
-```
+- `author[0]`: student email shown in report
+- `author[1]`: OSID shown in report body/footer
+- `date`: report date shown in header/title page
+- `subject`: exam context metadata
 
-Docker support in this fork is inspired by these community examples:
-
-- [Tripex48 Docker example](https://github.com/Tripex48/OSCP-Exam-Report-Template-Markdown#docker)
-- [ret2src Docker example](https://github.com/ret2src/OSCP-Exam-Report-Template-Markdown#docker)
-
-## Relevant Files in This Fork
-
-- `osert.rb`
-- `filters/inline_code_box.lua`
-- `src/templates/eisvogel.latex`
-- `src/img/offsec-learning-partner.png`
-- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md`
-- `output/examples/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX_images/`
-- `Dockerfile`
-- `docker-entrypoint.sh`
-- `docker-compose.yml`
-- `docs/screenshots/`
