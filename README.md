@@ -67,14 +67,14 @@ Use the prebuilt Docker Hub image (recommended):
 docker pull oswaldocostaneto/oscp-report-template:latest
 ```
 
-Run with a Markdown file inside your current repository:
+Run with a report folder mounted once as `/data`:
 
 ```bash
 printf 'n\nn\n' | docker run --rm -i \
-  -v "$PWD":/workspace \
+  -v "/path/to/report-folder":/data \
   oswaldocostaneto/oscp-report-template:latest generate \
-  -i path/to/your/markdown-file.md \
-  -o output \
+  -i /data/Report.md \
+  -o /data/output \
   -e OSCP \
   -s OS-12345678
 ```
@@ -83,19 +83,19 @@ You can generate the included OSCP Exam Report v2.0 example to test quickly:
 
 ```bash
 printf 'n\nn\n' | docker run --rm -i \
-  -v "$PWD":/workspace \
+  -v "$PWD":/data \
   oswaldocostaneto/oscp-report-template:latest generate \
-  -i src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
-  -o output \
+  -i /data/src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
+  -o /data/output \
   -e OSCP \
   -s OS-12345678
 ```
 
 Parameters explained:
 
-- `-v "$PWD":/workspace`: mounts your current folder into container
-- `-i`: input Markdown path (relative to your repo root, or absolute container path)
-- `-o`: output directory (relative to your repo root, or absolute container path)
+- `-v "<host-folder>":/data`: mounts your report folder (markdown + images) into the container
+- `-i`: input Markdown path inside container (recommended: `/data/...`)
+- `-o`: output directory path inside container (recommended: `/data/output`)
 - `-e`: certification (this fork is focused only on `OSCP` mode)
 - `-s`: OSID used in output file naming
 
@@ -104,19 +104,7 @@ Important:
 - The script asks OSID again in CLI mode only if `-s` is not provided.
 - `-s` controls output filename naming.
 - The two `n` answers skip PDF preview and external lab report prompt.
-
-Use a report outside current repo:
-
-```bash
-printf 'n\nn\n' | docker run --rm -i \
-  -v "$PWD":/workspace \
-  -v "/home/user/reports":/reports \
-  oswaldocostaneto/oscp-report-template:latest generate \
-  -i /reports/Report.md \
-  -o output \
-  -e OSCP \
-  -s OS-12345678
-```
+- The image is self-contained with `osert.rb`, templates, filters, and assets built in.
 
 ### Secondary Option: Build Image Locally
 
@@ -126,10 +114,10 @@ docker build -t oscp-report-template:local .
 
 ```bash
 printf 'n\nn\n' | docker run --rm -i \
-  -v "$PWD":/workspace \
+  -v "$PWD":/data \
   oscp-report-template:local generate \
-  -i src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
-  -o output \
+  -i /data/src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
+  -o /data/output \
   -e OSCP \
   -s OS-12345678
 ```
