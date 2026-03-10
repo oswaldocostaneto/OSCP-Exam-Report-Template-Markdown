@@ -379,7 +379,7 @@ $if(graphics)$
 \newcommand{\pandoc@setimgmax}{%
   % Reserve room for border/shadow so the final framed image still fits.
   \setlength{\pandoc@imgmaxw}{\dimexpr\linewidth-2\fboxrule-\shadowsize\relax}%
-  \setlength{\pandoc@imgmaxh}{\dimexpr\textheight-2\fboxrule-\shadowsize\relax}%
+  \setlength{\pandoc@imgmaxh}{\dimexpr0.82\textheight-2\fboxrule-\shadowsize\relax}%
 }
 \newcommand*\pandocbounded[1]{% scales image to fit in text height/width
   \begingroup
@@ -387,11 +387,10 @@ $if(graphics)$
     \let\includegraphics\pandocorigincludegraphics
     \setlength{\fboxsep}{0pt}%
     \setlength{\fboxrule}{0.75pt}% ~1px border
-    \setlength{\shadowsize}{1.1pt}% subtle shadow
+    \setlength{\shadowsize}{1.6pt}% subtle but visible shadow
     \pandoc@setimgmax%
-    \adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{%
-      {\color{black!30}\shadowbox{#1}}%
-    }%
+    \sbox\pandoc@scaledbox{\adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{#1}}%
+    {\color{black!35}\shadowbox{\usebox{\pandoc@scaledbox}}}%
   \endgroup
 }
 \let\pandocorigincludegraphics\includegraphics
@@ -399,11 +398,10 @@ $if(graphics)$
   \begingroup
     \setlength{\fboxsep}{0pt}%
     \setlength{\fboxrule}{0.75pt}% ~1px border
-    \setlength{\shadowsize}{1.1pt}% subtle shadow
+    \setlength{\shadowsize}{1.6pt}% subtle but visible shadow
     \pandoc@setimgmax%
-    \adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{%
-      {\color{black!30}\shadowbox{\pandocorigincludegraphics[#1]{#2}}}%
-    }%
+    \sbox\pandoc@scaledbox{\adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{\pandocorigincludegraphics[#1]{#2}}}%
+    {\color{black!35}\shadowbox{\usebox{\pandoc@scaledbox}}}%
   \endgroup
 }
 \AtBeginEnvironment{figure}{\let\includegraphics\pandocshadowincludegraphics}
