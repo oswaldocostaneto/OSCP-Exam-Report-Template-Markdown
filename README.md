@@ -14,6 +14,7 @@ The customization scope is focused on the **official OffSec OSCP report template
 
 - This fork intentionally targets the official OSCP v2.0 template experience.
 - Other exam templates provided by the upstream repository were not reworked in this fork.
+- This fork supports two execution modes: native dependencies and Docker container.
 
 ## What This Fork Adds
 
@@ -50,7 +51,7 @@ The screenshots below were generated only from the example template `src/OSCP-ex
 
 ![Generic inline code and code block styling](docs/screenshots/code-inline-block-generic.png)
 
-## Usage
+## Usage Mode 1: Native Dependencies (Host Install)
 
 ```bash
 ruby osert.rb init
@@ -67,10 +68,50 @@ ruby osert.rb generate \
   -s OS-12345678
 ```
 
+## Usage Mode 2: Docker (Isolated Environment)
+
+This mode avoids installing Pandoc/LaTeX/p7zip directly on your host system.
+
+Build image:
+
+```bash
+docker build -t oscp-report-template:local .
+```
+
+Interactive generation:
+
+```bash
+docker run --rm -it -v "$PWD":/workspace oscp-report-template:local generate
+```
+
+Direct mode:
+
+```bash
+docker run --rm -it -v "$PWD":/workspace oscp-report-template:local generate \
+  -i /workspace/src/OSCP-exam-report-template_OS_v2.md \
+  -o /workspace/output \
+  -e OSCP \
+  -s OS-12345678
+```
+
+With Docker Compose:
+
+```bash
+docker compose run --rm osert generate
+```
+
+Docker support in this fork is inspired by these community examples:
+
+- [Tripex48 Docker example](https://github.com/Tripex48/OSCP-Exam-Report-Template-Markdown#docker)
+- [ret2src Docker example](https://github.com/ret2src/OSCP-Exam-Report-Template-Markdown#docker)
+
 ## Relevant Files in This Fork
 
 - `osert.rb`
 - `filters/inline_code_box.lua`
 - `src/templates/eisvogel.latex`
 - `src/img/offsec-learning-partner.png`
+- `Dockerfile`
+- `docker-entrypoint.sh`
+- `docker-compose.yml`
 - `docs/screenshots/`

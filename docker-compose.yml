@@ -1,0 +1,9 @@
+services:
+  osert:
+    build: .
+    image: oscp-report-template:local
+    working_dir: /workspace
+    volumes:
+      - ./:/workspace
+    stdin_open: true
+    tty: true

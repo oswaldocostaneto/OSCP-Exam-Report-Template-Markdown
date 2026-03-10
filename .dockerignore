@@ -1,0 +1,6 @@
+.git
+.github
+output
+*.7z
+*.pdf
+**/.DS_Store
