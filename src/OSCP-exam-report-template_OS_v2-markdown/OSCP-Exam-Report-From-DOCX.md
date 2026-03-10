@@ -63,6 +63,8 @@ The information gathering portion of a penetration test focuses on identifying t
 
 The service enumeration portion of a penetration test focuses on gathering information about what services are alive on a system or systems. This is valuable for an attacker as it provides detailed information on potential attack vectors into a system. Understanding what applications are running on the system gives an attacker needed information before performing the actual penetration test. In some cases, some ports may not be listed.
 
+In this stage, the operator validated findings with `nmap -sCV`, checked service exposure with `snmpwalk -v1 -c public`, and documented reusable commands in `C:\Program Files\Tooling\notes.txt`.
+
 ## Penetration
 
 The penetration testing portions of the assessment focus heavily on gaining access to a variety of systems. During this penetration test, John was able to successfully gain access to 10 out of the 50 systems.
@@ -131,6 +133,8 @@ Nmap done: 1 IP address (1 host up) scanned in 173.20 seconds
 ```powershell
 └─\$ nmap -sCV 192.168.232.55
 ```
+
+The evidence was validated with inline commands `smbclient -L \\\\192.168.232.55`, `smbclient \\\\192.168.232.55\\shenzi`, and `cat passwords.txt` before moving to exploitation.
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image3.png)
 
@@ -465,5 +469,3 @@ John noticed the presence of the Thunderbird program on the user's desktop, and 
 **System Proof Screenshot:**
 
 ![](OSCP-Exam-Report-From-DOCX_images/media/image38.jpeg)
-
-

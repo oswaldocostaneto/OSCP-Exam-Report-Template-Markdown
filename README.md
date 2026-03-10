@@ -35,14 +35,12 @@ This fork is based on [noraj/OSCP-Exam-Report-Template-Markdown](https://github.
   </tr>
 </table>
 
-## 📁 Included OffSec Markdown Example
+## 📁 Included OffSec OSCP Exam Report v2.0 Markdown Example
 
-This repository includes a DOCX->Markdown converted example, already organized with everything in one folder:
+This repository includes a DOCX->Markdown converted example from official Offsec OSCP Exam Report template, already organized with everything in one folder:
 
 - `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md`
-- `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX_images/`
-- `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-OS-12345678-Exam-Report.pdf`
-- `src/OSCP-exam-report-template_OS_v2-markdown/OSCP-OS-12345678-Exam-Report.7z`
+- Rendered sample PDF: `output/examples/OSCP-exam-report-template_OS_v2.pdf`
 
 ## 🧰 Usage Mode 1: Native Dependencies
 
@@ -75,13 +73,13 @@ Run with a Markdown file inside your current repository:
 printf 'n\nn\n' | docker run --rm -i \
   -v "$PWD":/workspace \
   oswaldocostaneto/oscp-report-template:latest generate \
-  -i "path/to/your/markdown-file.md" \
+  -i path/to/your/markdown-file.md \
   -o output \
   -e OSCP \
   -s OS-12345678
 ```
 
-Generate the included OSCP v2.0 example quickly:
+You can generate the included OSCP Exam Report v2.0 example to test quickly:
 
 ```bash
 printf 'n\nn\n' | docker run --rm -i \
@@ -98,14 +96,13 @@ Parameters explained:
 - `-v "$PWD":/workspace`: mounts your current folder into container
 - `-i`: input Markdown path (relative to your repo root, or absolute container path)
 - `-o`: output directory (relative to your repo root, or absolute container path)
-- `-e`: certification (`OSCP`, `OSWE`, etc.)
+- `-e`: certification (this fork is focused only on `OSCP` mode)
 - `-s`: OSID used in output file naming
 
 Important:
 
 - The script asks OSID again in CLI mode only if `-s` is not provided.
 - `-s` controls output filename naming.
-- Report content (email/OSID displayed inside PDF) comes from Markdown metadata/front matter.
 - The two `n` answers skip PDF preview and external lab report prompt.
 
 Use a report outside current repo:
@@ -131,7 +128,7 @@ docker build -t oscp-report-template:local .
 printf 'n\nn\n' | docker run --rm -i \
   -v "$PWD":/workspace \
   oscp-report-template:local generate \
-  -i src/OSCP-exam-report-template_OS_v2.md \
+  -i src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
   -o output \
   -e OSCP \
   -s OS-12345678
@@ -155,17 +152,6 @@ Platform notes:
 - Linux x64 and ARM: supported
 - Windows x64 and ARM: supported via Docker Desktop/WSL2 with Linux containers
 - Native Windows container images (`windows/amd64`, `windows/arm64`): not supported by this Ubuntu-based image
-
-Required GitHub secrets:
-
-- `DOCKERHUB_USERNAME`
-- `DOCKERHUB_TOKEN`
-
-Publish triggers:
-
-- push to `master` (when Docker-related files change)
-- push tags like `v1.0.0`
-- manual run in Actions (`workflow_dispatch`)
 
 ## 📝 Markdown Metadata Quick Guide
 
@@ -193,4 +179,3 @@ Quick mapping:
 - `author[1]`: OSID shown in report body/footer
 - `date`: report date shown in header/title page
 - `subject`: exam context metadata
-
