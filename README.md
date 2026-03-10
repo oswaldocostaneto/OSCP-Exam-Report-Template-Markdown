@@ -74,6 +74,12 @@ This mode avoids installing Pandoc/LaTeX/p7zip directly on your host system.
 The bind mount `-v "$PWD":/workspace` is what makes generated files visible on the host.
 Generated files will be written to your local `./output` directory.
 
+Important:
+
+- The `-i` input path must exist **inside the container**.
+- If you only mount `-v "$PWD":/workspace`, then `-i` must point to `/workspace/...`.
+- Host paths like `/home/user/...` or `/mnt/hgfs/...` will fail unless you mount them with an extra `-v`.
+
 Build image:
 
 ```bash
@@ -106,6 +112,19 @@ The two `n` answers skip:
 
 - PDF preview (`xdg-open`)
 - optional external lab report prompt
+
+Using a report file outside the repository (extra volume mount):
+
+```bash
+printf 'n\nn\n' | docker run --rm -i \
+  -v "$PWD":/workspace \
+  -v "/home/oscn/Desktop/New Folder":/reports \
+  oscp-report-template:local generate \
+  -i "/reports/Report.md" \
+  -o /workspace/output \
+  -e OSCP \
+  -s OS-12345678
+```
 
 Direct mode:
 
