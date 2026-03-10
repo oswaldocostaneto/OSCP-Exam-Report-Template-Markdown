@@ -374,23 +374,24 @@ $if(graphics)$
 \makeatletter
 \newsavebox\pandoc@box
 \newsavebox\pandoc@scaledbox
+\newlength{\pandoc@imgmaxw}
+\newlength{\pandoc@imgmaxh}
+\newcommand{\pandoc@setimgmax}{%
+  % Reserve room for border/shadow so the final framed image still fits.
+  \setlength{\pandoc@imgmaxw}{\dimexpr\linewidth-2\fboxrule-\shadowsize\relax}%
+  \setlength{\pandoc@imgmaxh}{\dimexpr\textheight-2\fboxrule-\shadowsize\relax}%
+}
 \newcommand*\pandocbounded[1]{% scales image to fit in text height/width
   \begingroup
     % Avoid nested shadow: render the raw image first, then wrap once.
     \let\includegraphics\pandocorigincludegraphics
-    \sbox\pandoc@box{#1}%
-    \Gscale@div\@tempa{\textheight}{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
-    \Gscale@div\@tempb{\linewidth}{\wd\pandoc@box}%
-    \ifdim\@tempb\p@<\@tempa\p@\let\@tempa\@tempb\fi% select the smaller of both
-    \ifdim\@tempa\p@<\p@
-      \sbox\pandoc@scaledbox{\scalebox{\@tempa}{\usebox\pandoc@box}}%
-    \else
-      \sbox\pandoc@scaledbox{\usebox\pandoc@box}%
-    \fi
     \setlength{\fboxsep}{0pt}%
     \setlength{\fboxrule}{0.75pt}% ~1px border
     \setlength{\shadowsize}{1.1pt}% subtle shadow
-    {\color{black!30}\shadowbox{\usebox{\pandoc@scaledbox}}}%
+    \pandoc@setimgmax%
+    \adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{%
+      {\color{black!30}\shadowbox{#1}}%
+    }%
   \endgroup
 }
 \let\pandocorigincludegraphics\includegraphics
@@ -399,7 +400,10 @@ $if(graphics)$
     \setlength{\fboxsep}{0pt}%
     \setlength{\fboxrule}{0.75pt}% ~1px border
     \setlength{\shadowsize}{1.1pt}% subtle shadow
-    {\color{black!30}\shadowbox{\pandocorigincludegraphics[#1]{#2}}}%
+    \pandoc@setimgmax%
+    \adjustbox{max totalsize={\pandoc@imgmaxw}{\pandoc@imgmaxh}}{%
+      {\color{black!30}\shadowbox{\pandocorigincludegraphics[#1]{#2}}}%
+    }%
   \endgroup
 }
 \AtBeginEnvironment{figure}{\let\includegraphics\pandocshadowincludegraphics}
