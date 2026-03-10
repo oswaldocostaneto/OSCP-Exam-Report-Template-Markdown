@@ -1,4 +1,4 @@
-# OSCP Exam Report Template (Custom Private Fork)
+# OSCP Exam Report Template - o5Cn
 
 This private fork is based on [noraj/OSCP-Exam-Report-Template-Markdown](https://github.com/noraj/OSCP-Exam-Report-Template-Markdown), with practical improvements for a real `ruby osert.rb generate` workflow.
 
@@ -18,18 +18,18 @@ The customization scope is focused on the **official OffSec OSCP report template
 
 ## What This Fork Adds
 
-1. A versioned local Eisvogel template in `src/templates/eisvogel.latex`.
-2. A versioned local cover logo in `src/img/offsec-learning-partner.png`.
-3. `osert.rb` now prioritizes local template/logo files (no global `~/.local/...` dependency).
-4. Better relative image path support (relative to the source `.md` directory).
-5. OffSec-style custom cover page.
-6. Page numbering starts at the main content (not on cover/TOC pages).
-7. Custom footer with `OSID` on the left and `PAGE / TOTAL` on the right.
-8. Code blocks with border, light background, line numbers, and long-line wrapping.
-9. Styled inline code.
-10. Image border + subtle shadow (including images with `{ width=... }`).
-11. Improved long URL wrapping inside margins.
-12. Preview command support for macOS (`open`) and Linux (`xdg-open`).
+- 📄 A versioned local Eisvogel template in `src/templates/eisvogel.latex`.
+- 🖼️ A versioned local cover logo in `src/img/offsec-learning-partner.png`.
+- 🧠 `osert.rb` now prioritizes local template/logo files (no global `~/.local/...` dependency).
+- 📁 Better relative image path support (relative to the source `.md` directory).
+- 🎯 OffSec-style custom cover page.
+- 🔢 Page numbering starts at the main content (not on cover/TOC pages).
+- 🧾 Custom footer with `OSID` on the left and `PAGE / TOTAL` on the right.
+- 💻 Code blocks with border, light background, line numbers, and long-line wrapping.
+- ✍️ Styled inline code.
+- 🖼️ Image border + subtle shadow (including images with `{ width=... }`).
+- 🔗 Improved long URL wrapping inside margins.
+- 👀 Preview command support for macOS (`open`) and Linux (`xdg-open`).
 
 ## Generic Preview (No Real Report Data)
 
@@ -50,6 +50,23 @@ The screenshots below were generated only from the example template `src/OSCP-ex
 ### Inline Code + Code Block Styling
 
 ![Generic inline code and code block styling](docs/screenshots/code-inline-block-generic.png)
+
+## Included OffSec Example (DOCX -> Markdown)
+
+This fork also includes an OffSec sample report converted from DOCX to Markdown, with a relative image directory ready to use:
+
+- `src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md`
+- `src/examples/offsec-v2-docx/OSCP-Exam-Report-From-DOCX_images/`
+
+Generate it directly:
+
+```bash
+ruby osert.rb generate \
+  -i /path/to/repo/src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md \
+  -o /path/to/repo/output \
+  -e OSCP \
+  -s OS-12345678
+```
 
 ## Usage Mode 1: Native Dependencies (Host Install)
 
@@ -108,6 +125,16 @@ printf 'n\nn\n' | docker run --rm -i -v "$PWD":/workspace oscp-report-template:l
   -s OS-12345678
 ```
 
+Generate the included OffSec DOCX->Markdown example (with relative image folder):
+
+```bash
+printf 'n\nn\n' | docker run --rm -i -v "$PWD":/workspace oscp-report-template:local generate \
+  -i /workspace/src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md \
+  -o /workspace/output \
+  -e OSCP \
+  -s OS-12345678
+```
+
 The two `n` answers skip:
 
 - PDF preview (`xdg-open`)
@@ -153,6 +180,8 @@ Docker support in this fork is inspired by these community examples:
 - `filters/inline_code_box.lua`
 - `src/templates/eisvogel.latex`
 - `src/img/offsec-learning-partner.png`
+- `src/examples/offsec-v2-docx/OSCP-Exam-Report-OffSec-v2-Example.md`
+- `src/examples/offsec-v2-docx/OSCP-Exam-Report-From-DOCX_images/`
 - `Dockerfile`
 - `docker-entrypoint.sh`
 - `docker-compose.yml`
