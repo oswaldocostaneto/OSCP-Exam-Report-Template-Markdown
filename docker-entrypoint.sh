@@ -40,6 +40,9 @@ fi
 case "$1" in
   init|generate)
     args=("$@")
+    cmd="${args[0]}"
+    input_path=""
+    has_output=0
     i=0
     while [[ $i -lt ${#args[@]} ]]; do
       case "${args[$i]}" in
@@ -47,6 +50,7 @@ case "$1" in
           j=$((i + 1))
           if [[ $j -lt ${#args[@]} ]]; then
             args[$j]="$(normalize_user_path "${args[$j]}")"
+            input_path="${args[$j]}"
           fi
           i=$((i + 2))
           continue
@@ -55,6 +59,7 @@ case "$1" in
           j=$((i + 1))
           if [[ $j -lt ${#args[@]} ]]; then
             args[$j]="$(normalize_user_path "${args[$j]}" "$OSERT_DATA_DIR")"
+            has_output=1
           fi
           i=$((i + 2))
           continue
@@ -71,11 +76,13 @@ case "$1" in
           key="${args[$i]%%=*}"
           val="${args[$i]#*=}"
           args[$i]="${key}=$(normalize_user_path "$val")"
+          input_path="${args[$i]#*=}"
           ;;
         --output=*)
           key="${args[$i]%%=*}"
           val="${args[$i]#*=}"
           args[$i]="${key}=$(normalize_user_path "$val" "$OSERT_DATA_DIR")"
+          has_output=1
           ;;
         --resource-path=*)
           key="${args[$i]%%=*}"
@@ -85,6 +92,12 @@ case "$1" in
       esac
       i=$((i + 1))
     done
+
+    # Docker convenience: for `generate`, default output directory to input file directory.
+    if [[ "$cmd" == "generate" && $has_output -eq 0 && -n "$input_path" ]]; then
+      args+=("-o" "$(dirname "$input_path")")
+    fi
+
     exec ruby "${OSERT_HOME}/osert.rb" "${args[@]}"
     ;;
   *)

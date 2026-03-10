@@ -326,6 +326,10 @@ begin
       output = gets.chomp
     end
 
+    abort("[!] Input markdown not found: #{input}") unless File.exist?(input)
+    abort('[!] Output path is empty. Provide -o or answer the output prompt.') if output.to_s.strip.empty?
+    FileUtils.mkdir_p(output)
+
     if options[:exam]
       exam = options[:exam]
     else

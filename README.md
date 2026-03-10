@@ -73,11 +73,12 @@ Run with a report folder mounted once as `/data`:
 printf 'n\nn\n' | docker run --rm -i \
   -v "/path/to/report-folder":/data \
   oswaldocostaneto/oscp-report-template:latest generate \
-  -i /data/Report.md \
-  -o /data/output \
+  -i Report.md \
   -e OSCP \
   -s OS-12345678
 ```
+
+`-o` is optional in Docker mode. If omitted, output is written to the same folder as `-i`.
 
 You can generate the included OSCP Exam Report v2.0 example to test quickly:
 
@@ -85,8 +86,7 @@ You can generate the included OSCP Exam Report v2.0 example to test quickly:
 printf 'n\nn\n' | docker run --rm -i \
   -v "$PWD":/data \
   oswaldocostaneto/oscp-report-template:latest generate \
-  -i /data/src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
-  -o /data/output \
+  -i src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
   -e OSCP \
   -s OS-12345678
 ```
@@ -94,8 +94,8 @@ printf 'n\nn\n' | docker run --rm -i \
 Parameters explained:
 
 - `-v "<host-folder>":/data`: mounts your report folder (markdown + images) into the container
-- `-i`: input Markdown path inside container (recommended: `/data/...`)
-- `-o`: output directory path inside container (recommended: `/data/output`)
+- `-i`: input Markdown path relative to mounted folder (e.g. `Report.md`)
+- `-o`: optional output directory path (relative or absolute inside container)
 - `-e`: certification (this fork is focused only on `OSCP` mode)
 - `-s`: OSID used in output file naming
 
@@ -116,8 +116,7 @@ docker build -t oscp-report-template:local .
 printf 'n\nn\n' | docker run --rm -i \
   -v "$PWD":/data \
   oscp-report-template:local generate \
-  -i /data/src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
-  -o /data/output \
+  -i src/OSCP-exam-report-template_OS_v2-markdown/OSCP-Exam-Report-From-DOCX.md \
   -e OSCP \
   -s OS-12345678
 ```
