@@ -11,6 +11,8 @@ RUN apt-get update \
       texlive-latex-extra \
       texlive-fonts-recommended \
       texlive-fonts-extra \
+      lmodern \
+      fonts-lmodern \
       p7zip-full \
       ca-certificates \
  && apt-get clean \

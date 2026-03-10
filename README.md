@@ -80,6 +80,12 @@ Build image:
 docker build -t oscp-report-template:local .
 ```
 
+After updating the repository (`git pull`), rebuild the image to pick up dependency changes:
+
+```bash
+docker build --no-cache -t oscp-report-template:local .
+```
+
 Interactive generation:
 
 ```bash
