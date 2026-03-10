@@ -246,11 +246,13 @@ end
 
 def build_highlight_argument(style)
   if pandoc_supports_option?('--syntax-highlighting')
-    "--syntax-highlighting=#{style}"
+    ["--syntax-highlighting=#{style}"]
+  elsif pandoc_supports_option?('--listings')
+    ['--listings']
   elsif pandoc_supports_option?('--highlight-style')
-    "--highlight-style=#{style}"
+    ["--highlight-style=#{style}"]
   else
-    ''
+    []
   end
 end
 
@@ -356,8 +358,8 @@ begin
     logo_arg = File.exist?(logo_path) ? "-V titlepage-logo=#{logo_path.shellescape} \\" : ''
     footer_right = '\\thepage\\ /\\ \\pageref*{LastPage}'
     header_includes = '\\usepackage{lastpage}'
-    highlight_arg = build_highlight_argument(style)
-    highlight_line = highlight_arg.empty? ? '' : "  #{highlight_arg} \\\n"
+    highlight_args = build_highlight_argument(style)
+    highlight_lines = highlight_args.map { |arg| "  #{arg} \\\n" }.join
     pandoc_cmd = <<~CMD
       pandoc #{input.shellescape} -o #{pdf.shellescape} \
         --from markdown+yaml_metadata_block+raw_html \
@@ -372,7 +374,7 @@ begin
         --toc-depth 6 \
         --number-sections \
         --top-level-division=chapter \
-      #{highlight_line}  --resource-path=#{resource_path.shellescape}
+      #{highlight_lines}  --resource-path=#{resource_path.shellescape}
     CMD
     pandoc_output = `#{pandoc_cmd} 2>&1`
 
