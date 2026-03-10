@@ -71,6 +71,8 @@ ruby osert.rb generate \
 ## Usage Mode 2: Docker (Isolated Environment)
 
 This mode avoids installing Pandoc/LaTeX/p7zip directly on your host system.
+The bind mount `-v "$PWD":/workspace` is what makes generated files visible on the host.
+Generated files will be written to your local `./output` directory.
 
 Build image:
 
@@ -83,6 +85,21 @@ Interactive generation:
 ```bash
 docker run --rm -it -v "$PWD":/workspace oscp-report-template:local generate
 ```
+
+Non-interactive generation (recommended for containers):
+
+```bash
+printf 'n\nn\n' | docker run --rm -i -v "$PWD":/workspace oscp-report-template:local generate \
+  -i /workspace/src/OSCP-exam-report-template_OS_v2.md \
+  -o /workspace/output \
+  -e OSCP \
+  -s OS-12345678
+```
+
+The two `n` answers skip:
+
+- PDF preview (`xdg-open`)
+- optional external lab report prompt
 
 Direct mode:
 

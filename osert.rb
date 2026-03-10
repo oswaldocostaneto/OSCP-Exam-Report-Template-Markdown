@@ -228,6 +228,32 @@ def preview_command
   nil
 end
 
+def pandoc_supports_option?(option)
+  @pandoc_help ||= `pandoc --help 2>&1`
+  @pandoc_help.include?(option)
+end
+
+def available_highlight_styles
+  @available_highlight_styles ||= `pandoc --list-highlight-styles 2>/dev/null`.split("\n").map(&:strip).reject(&:empty?)
+end
+
+def preferred_highlight_style
+  return 'idiomatic' if pandoc_supports_option?('--syntax-highlighting')
+
+  preferred = %w[breezedark kate pygments]
+  preferred.find { |style| available_highlight_styles.include?(style) } || available_highlight_styles.first || 'breezedark'
+end
+
+def build_highlight_argument(style)
+  if pandoc_supports_option?('--syntax-highlighting')
+    "--syntax-highlighting=#{style}"
+  elsif pandoc_supports_option?('--highlight-style')
+    "--highlight-style=#{style}"
+  else
+    ''
+  end
+end
+
 begin
   case command
   when 'init'
@@ -282,8 +308,7 @@ begin
     puts ' for getting your report.'
   when 'generate'
     puts '[+] Preparing your final report...'
-    # Use Pandoc idiomatic syntax highlighting (listings-like output for LaTeX/PDF).
-    style = 'idiomatic'
+    style = preferred_highlight_style
 
     if options[:input]
       input = options[:input]
@@ -331,43 +356,59 @@ begin
     logo_arg = File.exist?(logo_path) ? "-V titlepage-logo=#{logo_path.shellescape} \\" : ''
     footer_right = '\\thepage\\ /\\ \\pageref*{LastPage}'
     header_includes = '\\usepackage{lastpage}'
-    `pandoc #{input.shellescape} -o #{pdf.shellescape} \
-      --from markdown+yaml_metadata_block+raw_html \
-      #{template_arg}
-      -V book=true \
-      #{logo_arg}
-      -V header-includes=#{header_includes.shellescape} \
-      -V footer-right=#{footer_right.shellescape} \
-      --pdf-engine=xelatex \
-      --lua-filter=#{inline_code_filter.shellescape} \
-      --table-of-contents \
-      --toc-depth 6 \
-      --number-sections \
-      --top-level-division=chapter \
-      --syntax-highlighting=#{style} \
-      --resource-path=#{resource_path.shellescape}
-    `
+    highlight_arg = build_highlight_argument(style)
+    highlight_line = highlight_arg.empty? ? '' : "  #{highlight_arg} \\\n"
+    pandoc_cmd = <<~CMD
+      pandoc #{input.shellescape} -o #{pdf.shellescape} \
+        --from markdown+yaml_metadata_block+raw_html \
+        #{template_arg}
+        -V book=true \
+        #{logo_arg}
+        -V header-includes=#{header_includes.shellescape} \
+        -V footer-right=#{footer_right.shellescape} \
+        --pdf-engine=xelatex \
+        --lua-filter=#{inline_code_filter.shellescape} \
+        --table-of-contents \
+        --toc-depth 6 \
+        --number-sections \
+        --top-level-division=chapter \
+      #{highlight_line}  --resource-path=#{resource_path.shellescape}
+    CMD
+    pandoc_output = `#{pandoc_cmd} 2>&1`
+
+    unless $?.success?
+      warn pandoc_output unless pandoc_output.strip.empty?
+      abort("[!] Pandoc failed (exit #{$?.exitstatus}). PDF was not generated.")
+    end
+
+    abort('[!] Pandoc did not generate a PDF file. Check the error output above.') unless File.exist?(pdf)
+
     puts "[+] PDF generated at #{colors[:red]}#{pdf}#{colors[:nocolor]}"
 
     # Preview
     puts_prompt '[+] Do you want to preview the report? [Y/n]'
     choice = gets.chomp
     if choice.downcase == 'y' || choice.empty?
-      opener = preview_command
-      if opener
-        viewer = fork do
-          exec(*opener, pdf)
-        rescue Errno::ENOENT
-          warn "[!] Preview command not found: #{opener.join(' ')}"
-          exit! 1
+      if File.exist?(pdf)
+        opener = preview_command
+        if opener
+          viewer = fork do
+            exec(*opener, pdf)
+          rescue Errno::ENOENT
+            warn "[!] Preview command not found: #{opener.join(' ')}"
+            exit! 1
+          end
+          Process.detach(viewer)
+        else
+          warn '[!] No preview command available (expected: open or xdg-open).'
         end
-        Process.detach(viewer)
       else
-        warn '[!] No preview command available (expected: open or xdg-open).'
+        warn '[!] Preview skipped because PDF file was not found.'
       end
     end
 
     # Generating archive
+    abort('[!] Cannot create archive because PDF file was not found.') unless File.exist?(pdf)
     puts '[+] Generating archive...'
     archive = "#{output}/#{exam}-#{osid}-Exam-Report.7z"
     `7z a #{archive.shellescape} #{File.expand_path(pdf.shellescape)}`
